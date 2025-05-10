@@ -33,6 +33,18 @@ python run_pipeline.py \
   --hf_token YOUR_HF_TOKEN
 ```
 
+Добавьте флаг --debug, чтобы сохранять результаты с постфиксом имени входного файла:
+
+python run_pipeline.py \
+  --input data/input/meeting1.wav \
+  --reference data/input/ali.wav \
+  --output data/output \
+  --debug
+
+Файлы будут называться, например: transcript_meeting1.txt, feedback_meeting1.md и т.п.
+
+
+
 ### 🔑 Переменные окружения (опционально)
 
 Создайте файл `.env` и добавьте:
@@ -69,7 +81,7 @@ speech_feedback_system/
 
 * `target_speaker_combined.wav` — речь целевого пользователя
 * `transcript.txt` — текстовая расшифровка
-* `feedback_report.md` — отчёт по метрикам речи
+* `analysis_report.md` — отчёт по метрикам речи
 * `ai_feedback.md` — рекомендации от LLM
 
 ---

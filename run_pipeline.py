@@ -19,8 +19,11 @@ hf_token = os.getenv("HF_TOKEN")
 openrouter_key = os.getenv("OPENROUTER_API_KEY")
 
 
-def main(audio_path, reference_path, output_dir):
+def main(audio_path, reference_path, output_dir, debug=False):
     audio_path = Path(audio_path)
+    basename = Path(audio_path).stem if debug else ""
+    suffix = f"_{basename}" if debug else ""
+
     reference_path = Path(reference_path)
     output_dir = Path(output_dir)
     output_dir.mkdir(exist_ok=True, parents=True)
@@ -50,7 +53,7 @@ def main(audio_path, reference_path, output_dir):
     )
 
     # === 4. Объединение всех сегментов
-    final_path = output_dir / "target_speaker_combined.wav"
+    final_path = output_dir / f"target_speaker_combined{suffix}.wav"
     combine_segments(
         mono_segments=mono_segments,
         target_segments=target_segments,
@@ -64,10 +67,10 @@ def main(audio_path, reference_path, output_dir):
 
     # === 5. Распознавание речи
 
-    asr_path = output_dir / "target_speaker_combined.wav"
+    asr_path = output_dir / f"target_speaker_combined{suffix}.wav"
     transcript = transcribe_audio(str(asr_path), model_size="base")
 
-    transcript_path = output_dir / "transcript.txt"
+    transcript_path = output_dir / f"transcript{suffix}.txt"
     with open(transcript_path, "w", encoding="utf-8") as f:
         f.write(transcript)
 
@@ -77,7 +80,7 @@ def main(audio_path, reference_path, output_dir):
 
     report = analyze_transcript(transcript)
 
-    report_path = output_dir / "feedback_report.md"
+    report_path = output_dir / f"analysis_report{suffix}.md"
     save_report(report, path=str(report_path))
 
     print(f"\n📊 Речевой анализ сохранён: {report_path}")
@@ -94,10 +97,10 @@ def main(audio_path, reference_path, output_dir):
     )
 
     # Сохраняем в файл
-    with open(output_dir / "ai_feedback.md", "w", encoding="utf-8") as f:
+    with open(output_dir / f'feedback{suffix}.md', "w", encoding="utf-8") as f:
         f.write(ai_feedback)
 
-    print(f"\n🧠 Рекомендации сохранены в: {output_dir / 'ai_feedback.md'}")
+    print(f"\n🧠 Рекомендации сохранены в: {output_dir /  f'feedback{suffix}.md'}")
 
 
 if __name__ == "__main__":
@@ -105,6 +108,8 @@ if __name__ == "__main__":
     parser.add_argument("--input", required=True, help="Path to main audio file (wav)")
     parser.add_argument("--reference", required=True, help="Path to reference speaker audio (wav)")
     parser.add_argument("--output", default="data/output", help="Output directory")
+    parser.add_argument("--debug", action="store_true",
+                        help="Включить режим отладки (добавляет постфиксы к результатам)")
 
     args = parser.parse_args()
 
