@@ -117,4 +117,5 @@ if __name__ == "__main__":
         audio_path=args.input,
         reference_path=args.reference,
         output_dir=args.output,
+        debug=args.debug
     )
