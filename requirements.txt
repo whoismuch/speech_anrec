@@ -1,0 +1,12 @@
+pyannote.audio
+resemblyzer
+speechbrain
+torchaudio
+torch
+soundfile
+librosa
+numpy
+scikit-learn
+tqdm
+openai-whisper
+python-dotenv
