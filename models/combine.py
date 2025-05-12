@@ -6,7 +6,7 @@ import torch
 import torchaudio
 
 def combine_segments(mono_segments, target_segments, target_speaker, y, sr, output_path):
-    print("🎛 Объединяем все фрагменты целевого спикера...")
+    print("🔜 Объединяем все фрагменты целевого спикера...")
 
     mono_target_segments = [
         (start, end) for start, end, speaker in mono_segments

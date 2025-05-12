@@ -10,8 +10,13 @@ from models.combine import combine_segments
 from models.asr import transcribe_audio
 from models.analysis import analyze_transcript, save_report
 from models.feedback import generate_feedback
+from models.speaker_extraction import extract_target_speaker
+
+
+
 from dotenv import load_dotenv
 import os
+import warnings
 
 load_dotenv()
 
@@ -20,72 +25,48 @@ openrouter_key = os.getenv("OPENROUTER_API_KEY")
 
 
 def main(audio_path, reference_path, output_dir, debug=False):
+    warnings.filterwarnings("ignore")
+
     audio_path = Path(audio_path)
     basename = Path(audio_path).stem if debug else ""
-    suffix = f"_{basename}" if debug else ""
+    suffix = f"{basename}" if debug else ""
 
     reference_path = Path(reference_path)
+    initial_output_dir = Path(output_dir)
     output_dir = Path(output_dir)
     output_dir.mkdir(exist_ok=True, parents=True)
 
     print("🟢 Старт обработки...\n")
 
-    # === 1. Диаризация
-    mono_segments, multi_segments, diarization = run_diarization(str(audio_path), hf_token)
+    # 1. Диаризация
+    mono_segments, multi_segments, _ = run_diarization(str(audio_path))
 
-    # === 2. Определение целевого спикера
-    target_speaker, ref_embed, y, sr, encoder = identify_target_speaker(
+    # 2-4. Извлечение целевого спикера (ID + Separation + Combine)
+    combined_audio_path, target_speaker = extract_target_speaker(
         reference_path=str(reference_path),
         audio_path=str(audio_path),
         mono_segments=mono_segments,
-        sample_rate=16000
-    )
-
-    # === 3. Разделение перекрывающихся сегментов
-    target_segments = run_separation(
-        y=y,
-        sr=sr,
         multi_segments=multi_segments,
-        target_speaker=target_speaker,
-        ref_embed=ref_embed,
-        encoder=encoder,
-        output_dir=output_dir / "separated_segments"
+        output_dir=output_dir,
+        debug=debug
     )
 
-    # === 4. Объединение всех сегментов
-    final_path = output_dir / f"target_speaker_combined{suffix}.wav"
-    combine_segments(
-        mono_segments=mono_segments,
-        target_segments=target_segments,
-        target_speaker=target_speaker,
-        y=y,
-        sr=sr,
-        output_path=final_path
-    )
-
-    print(f"\n✅ Готово! Аудио целевого спикера сохранено в: {final_path}")
-
-    # === 5. Распознавание речи
-
-    asr_path = output_dir / f"target_speaker_combined{suffix}.wav"
-    transcript = transcribe_audio(str(asr_path), model_size="base")
-
-    transcript_path = output_dir / f"transcript{suffix}.txt"
+    # 5. ASR
+    transcript = transcribe_audio(str(combined_audio_path), model_size="base")
+    os.makedirs(initial_output_dir/"transcript", exist_ok=True)
+    output_dir = initial_output_dir / "transcript"
+    transcript_path = output_dir / f"{suffix}.txt"
     with open(transcript_path, "w", encoding="utf-8") as f:
         f.write(transcript)
 
-    print(f"\n📄 Текст сохранён в: {transcript_path}")
-
-    # === 6. Анализ текста
-
+    # 6. Анализ речи
     report = analyze_transcript(transcript)
-
-    report_path = output_dir / f"analysis_report{suffix}.md"
+    os.makedirs(initial_output_dir / "analysis_report", exist_ok=True)
+    output_dir = initial_output_dir / "analysis_report"
+    report_path = output_dir / f"{suffix}.md"
     save_report(report, path=str(report_path))
 
-    print(f"\n📊 Речевой анализ сохранён: {report_path}")
-
-    # === 6. Генерация рекомендаций
+    # 7. AI-рекомендации
     ai_feedback = generate_feedback(
         transcribed_text=transcript,
         total_words=report["metrics"]["Общее количество слов"],
@@ -95,12 +76,18 @@ def main(audio_path, reference_path, output_dir, debug=False):
         filler_counts=report["filler_counts"],
         api_key=openrouter_key
     )
-
-    # Сохраняем в файл
-    with open(output_dir / f'feedback{suffix}.md', "w", encoding="utf-8") as f:
+    os.makedirs(initial_output_dir/ "feedback", exist_ok=True)
+    output_dir = initial_output_dir / "feedback"
+    ai_feedback_path = output_dir / f"{suffix}.md"
+    with open(ai_feedback_path, "w", encoding="utf-8") as f:
         f.write(ai_feedback)
 
-    print(f"\n🧠 Рекомендации сохранены в: {output_dir /  f'feedback{suffix}.md'}")
+    print("\n✅ Обработка завершена!")
+    print(f"🎯 Target speaker: {target_speaker}")
+    print(f"🎧 Cleaned audio: {combined_audio_path}")
+    print(f"📝 Transcript: {transcript_path}")
+    print(f"📊 Report: {report_path}")
+    print(f"🤖 Feedback: {ai_feedback_path}")
 
 
 if __name__ == "__main__":

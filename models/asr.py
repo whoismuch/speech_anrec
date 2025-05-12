@@ -2,7 +2,7 @@
 
 import whisper
 
-def transcribe_audio(audio_path: str, model_size: str = "base") -> str:
+def transcribe_audio(audio_path: str, model_size: str = "medium") -> str:
     """
     Распознаёт речь в аудиофайле с помощью Whisper.
 
@@ -10,7 +10,7 @@ def transcribe_audio(audio_path: str, model_size: str = "base") -> str:
     :param model_size: "tiny", "base", "small", "medium", "large"
     :return: расшифрованный текст
     """
-    print(f"📝 Распознаём речь (модель: {model_size})...")
+    print(f"🔜Распознаём речь (модель: {model_size})...")
     model = whisper.load_model(model_size)
     result = model.transcribe(audio_path)
 
