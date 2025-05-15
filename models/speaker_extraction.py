@@ -1,4 +1,4 @@
-# models/speaker_extraction.py
+# models/test_speaker_extraction.py
 
 from pathlib import Path
 from models.speaker_id import identify_target_speaker

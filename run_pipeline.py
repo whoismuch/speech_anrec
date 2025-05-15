@@ -52,7 +52,7 @@ def main(audio_path, reference_path, output_dir, debug=False):
     )
 
     # 5. ASR
-    transcript = transcribe_audio(str(combined_audio_path), model_size="base")
+    transcript = transcribe_audio(str(combined_audio_path), model_size="small")
     os.makedirs(initial_output_dir/"transcript", exist_ok=True)
     output_dir = initial_output_dir / "transcript"
     transcript_path = output_dir / f"{suffix}.txt"

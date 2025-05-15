@@ -36,3 +36,14 @@ def identify_target_speaker(reference_path, audio_path, mono_segments, sample_ra
     print(f"\n ✅Целевой спикер: {target} (похожесть: {similarities[target]:.4f})")
 
     return target, ref_embed, y, sr, encoder
+
+def get_encoder():
+    return VoiceEncoder()
+
+def extract_embedding(audio_path, encoder, sample_rate=16000):
+    """
+    Возвращает эмбеддинг аудиофайла с помощью переданного encoder.
+    """
+    wav = preprocess_wav(audio_path)
+    return encoder.embed_utterance(wav)
+

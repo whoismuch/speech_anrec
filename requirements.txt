@@ -10,3 +10,5 @@ scikit-learn
 tqdm
 openai-whisper
 python-dotenv
+pydub
+jiwer
