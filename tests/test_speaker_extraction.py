@@ -20,20 +20,23 @@ import librosa.display
 
 REFERENCE_PATH = "tests/data/audio/reference/ali_imba_drink.wav"
 AUDIO_DIR = Path("tests/data/audio/ali/test")
-OUTPUT_DIR = Path("tests/data/output/speaker_extraction_results_NEW/ali")
+OUTPUT_DIR = Path("tests/data/output/speaker_extraction_results_FINAL_FINAL_THESIS/ali")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 encoder = get_encoder()
 
 def plot_waveform_comparison(original_path, extracted_path, output_path):
-    y_orig, sr = sf.read(original_path)
-    y_ext, _ = sf.read(extracted_path)
+    y_orig, sr_orig = sf.read(original_path)
+    y_ext, sr_ext = sf.read(extracted_path)
+
+    t_orig = np.linspace(0, len(y_orig) / sr_orig, len(y_orig))
+    t_ext = np.linspace(0, len(y_ext) / sr_ext, len(y_ext))
 
     plt.figure(figsize=(12, 4))
-    plt.plot(y_orig[:len(y_ext)], label="Многоспикерная запись", alpha=0.5)
-    plt.plot(y_ext, label="Извлечённый целевой спикер", alpha=0.8)
+    plt.plot(t_orig, y_orig, label="Многоспикерная запись", alpha=0.5)
+    plt.plot(t_ext, y_ext, label="Извлечённый целевой спикер", alpha=0.8)
     plt.title("Сравнение формы сигнала: до и после извлечения целевого говорящего")
-    plt.xlabel("Сэмплы")
+    plt.xlabel("Время, сек")
     plt.ylabel("Амплитуда")
     plt.legend()
     plt.tight_layout()

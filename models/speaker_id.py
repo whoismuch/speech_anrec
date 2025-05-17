@@ -14,8 +14,13 @@ def identify_target_speaker(reference_path, audio_path, mono_segments, sample_ra
     # Загружаем основное аудио
     y, sr = librosa.load(audio_path, sr=sample_rate)
 
+    MIN_DURATION = 1.0  # в секундах
+
     speaker_embeddings = {}
     for start, end, speaker in mono_segments:
+        if end - start < MIN_DURATION:
+            continue
+
         segment_audio = y[int(start * sr):int(end * sr)]
         try:
             wav = preprocess_wav(segment_audio, source_sr=sr)
@@ -31,6 +36,17 @@ def identify_target_speaker(reference_path, audio_path, mono_segments, sample_ra
     print("\n Сходство спикеров с эталоном:")
     for s, sim in sorted(similarities.items(), key=lambda x: x[1], reverse=True):
         print(f"  - {s}: {sim:.4f}")
+
+    print("🔍 Similarities:", similarities)
+    if not similarities or max(similarities.values()) < 0.75:
+        print("⚠️ Нет подходящих сегментов для идентификации целевого спикера.")
+        return (
+            "NOT_FOUND",
+            np.zeros_like(ref_embed),
+            np.array([]),
+            sr,
+            encoder
+        )
 
     target = max(similarities, key=similarities.get)
     print(f"\n ✅Целевой спикер: {target} (похожесть: {similarities[target]:.4f})")
