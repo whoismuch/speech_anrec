@@ -16,12 +16,13 @@ from models.speaker_extraction import extract_target_speaker
 from models.speaker_id import extract_embedding, get_encoder
 import librosa
 import librosa.display
+import argparse
 
 
-REFERENCE_PATH = "tests/data/audio/reference/ali_imba_drink.wav"
-AUDIO_DIR = Path("tests/data/audio/ali/test3")
-OUTPUT_DIR = Path("tests/data/output/speaker_extraction_results_FINAL_FINAL_THESIS_THESIS/ali")
-OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+# REFERENCE_PATH = "tests/data/audio/reference/ali_imba_drink.wav"
+# AUDIO_DIR = Path("tests/data/audio/ali/test3")
+# OUTPUT_DIR = Path("tests/data/output/speaker_extraction_results_FINAL_FINAL_THESIS_THESIS/ali")
+# OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 encoder = get_encoder()
 
@@ -94,6 +95,17 @@ def compute_similarity(reference_path, final_path):
     return similarity
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Speaker extraction test script")
+    parser.add_argument('--reference', type=str, required=True, help='Path to reference .wav file')
+    parser.add_argument('--audio_dir', type=str, required=True, help='Directory with test .wav files')
+    parser.add_argument('--output_dir', type=str, required=True, help='Directory to save results')
+    args = parser.parse_args()
+
+    REFERENCE_PATH = args.reference
+    AUDIO_DIR = Path(args.audio_dir)
+    OUTPUT_DIR = Path(args.output_dir)
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
     for audio_file in AUDIO_DIR.glob("*.wav"):
         name = audio_file.stem
         current_output_dir = OUTPUT_DIR / name
