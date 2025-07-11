@@ -19,8 +19,8 @@ import librosa.display
 
 
 REFERENCE_PATH = "tests/data/audio/reference/ali_imba_drink.wav"
-AUDIO_DIR = Path("tests/data/audio/ali/test")
-OUTPUT_DIR = Path("tests/data/output/speaker_extraction_results_FINAL_FINAL_THESIS/ali")
+AUDIO_DIR = Path("tests/data/audio/ali/test3")
+OUTPUT_DIR = Path("tests/data/output/speaker_extraction_results_FINAL_FINAL_THESIS_THESIS/ali")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 encoder = get_encoder()

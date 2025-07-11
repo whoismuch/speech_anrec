@@ -10,8 +10,8 @@ def extract_target_speaker(reference_path, audio_path, mono_segments, multi_segm
                            output_dir, debug=False):
     """
     Полный процесс извлечения целевого спикера:
-    1. Speaker ID
-    2. Separation overlapped сегментов
+    1. Идентификация спикера
+    2. Разделение перекрывающихся фрагментов
     3. Объединение всех фрагментов в WAV
 
     :param reference_path: путь к эталонному голосу
@@ -26,7 +26,7 @@ def extract_target_speaker(reference_path, audio_path, mono_segments, multi_segm
     basename = Path(audio_path).stem if debug else ""
     suffix = f"{basename}" if debug else ""
 
-    # 1. Speaker ID
+    # 1. Идентификация спикера
     target_speaker, ref_embed, y, sr, encoder = identify_target_speaker(
         reference_path=reference_path,
         audio_path=audio_path,
@@ -34,7 +34,7 @@ def extract_target_speaker(reference_path, audio_path, mono_segments, multi_segm
         sample_rate=16000
     )
 
-    # 2. Separation
+    # 2. Разделение перекрывающихся фрагментов
     target_segments = run_separation(
         y=y,
         sr=sr,
@@ -45,7 +45,7 @@ def extract_target_speaker(reference_path, audio_path, mono_segments, multi_segm
         output_dir=output_dir / "separated_segments"
     )
 
-    # 3. Combine
+    # 3. Объединение всех фрагментов в WAV
     os.makedirs(output_dir/"target_speaker_combined", exist_ok=True)
     output_dir = output_dir / "target_speaker_combined"
     final_path = output_dir / f"{suffix}.wav"

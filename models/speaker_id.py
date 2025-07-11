@@ -38,7 +38,7 @@ def identify_target_speaker(reference_path, audio_path, mono_segments, sample_ra
         print(f"  - {s}: {sim:.4f}")
 
     print("🔍 Similarities:", similarities)
-    if not similarities or max(similarities.values()) < 0.75:
+    if not similarities or max(similarities.values()) < 0.5:
         print("⚠️ Нет подходящих сегментов для идентификации целевого спикера.")
         return (
             "NOT_FOUND",
